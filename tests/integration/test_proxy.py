@@ -4,8 +4,8 @@ import json
 import os
 import time
 import unittest
-from urllib.error import URLError
-from urllib.request import urlopen
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 
 class ProxyIntegrationTest(unittest.TestCase):
@@ -34,3 +34,35 @@ class ProxyIntegrationTest(unittest.TestCase):
                     self.assertEqual(response.status, 200)
                     self.assertEqual(response.headers.get_content_type(), "application/json")
                     self.assertEqual(json.load(response), {"status": "ok"})
+
+    def test_chat_answer_through_vite_matches_flask(self):
+        answers = []
+        for url in (self.backend, self.frontend):
+            with self.subTest(url=url):
+                request = Request(
+                    f"{url}/api/chat",
+                    data=json.dumps({"message": "A test question"}).encode(),
+                    headers={"Content-Type": "application/json"},
+                    method="POST",
+                )
+                with urlopen(request, timeout=5) as response:
+                    self.assertEqual(response.status, 200)
+                    self.assertEqual(response.headers.get_content_type(), "application/json")
+                    answer = json.load(response)["answer"]
+                    self.assertIsInstance(answer, str)
+                    self.assertIn("Mock response", answer)
+                    answers.append(answer)
+        self.assertEqual(answers[0], answers[1])
+
+    def test_chat_validation_error_passes_through_vite(self):
+        request = Request(
+            f"{self.frontend}/api/chat",
+            data=json.dumps({"message": " "}).encode(),
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with self.assertRaises(HTTPError) as caught:
+            urlopen(request, timeout=5)
+        with caught.exception as response:
+            self.assertEqual(response.code, 400)
+            self.assertEqual(json.load(response)["error"]["code"], "invalid_message")

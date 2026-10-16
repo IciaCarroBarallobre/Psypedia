@@ -6,7 +6,7 @@ answers grounded in curated clinical literature.
 
 ## Current scope
 
-The responsive, light-mode chat lets you submit questions and displays user and assistant messages separately. It is an interface preview: the frontend is not connected to the chat API or a model and does not generate clinical answers. Messages are kept in memory and cleared on refresh. Clinical sources have not been selected or integrated yet.
+The responsive, light-mode chat lets you submit questions and displays user and assistant messages separately. It is an interface preview: the frontend calls the Flask chat API, which returns an explicit mock answer without a model or clinical answer generation. Messages are kept in memory and cleared on refresh. Clinical sources have not been selected or integrated yet.
 
 ## Getting started
 
@@ -106,6 +106,6 @@ curl --fail http://localhost:5000/api/chat \
   -d '{"message":"What is psychotherapy?"}'
 ```
 
-Use your configured backend port if different. The frontend is not wired to this endpoint yet.
+Use your configured backend port if different. The frontend sends questions to this endpoint through the Vite proxy and displays returned answers or visible errors.
 
 See [backend/README.md](backend/README.md) for backend architecture and testing.
