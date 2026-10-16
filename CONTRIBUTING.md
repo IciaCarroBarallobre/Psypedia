@@ -172,3 +172,7 @@ docker run --rm --mount "type=bind,src=$(pwd)/frontend,dst=/app" --workdir /app 
 Review generated files and dependency changes, then run `make setup` and `make up`. `make check` includes chat component tests and the frontend build. The current chat stores messages in memory and displays a disconnected-assistant notice; it does not call a chat API or AI service. Messages are cleared on refresh; clinical sources are not integrated.
 
 The UI is light-only and mobile-first. Brand tokens live in `frontend/src/styles/theme.css`; semantic aliases in `src/style.css` adapt them to shared controls. Use those tokens rather than component-specific hex colors. Start with small-screen styles, add wider breakpoints, and keep interactive targets at least 44px.
+
+## Backend structure
+
+See [backend/README.md](backend/README.md) for the request flow, layer responsibilities, provider injection, and testing. Keep Flask details in the API layer; run backend checks with `make test`.

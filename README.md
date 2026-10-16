@@ -6,7 +6,7 @@ answers grounded in curated clinical literature.
 
 ## Current scope
 
-The responsive, light-mode chat lets you submit questions and displays user and assistant messages separately. It is an interface preview: the assistant is not connected to an API or model and does not generate clinical answers. Messages are kept in memory and cleared on refresh. Clinical sources have not been selected or integrated yet.
+The responsive, light-mode chat lets you submit questions and displays user and assistant messages separately. It is an interface preview: the frontend is not connected to the chat API or a model and does not generate clinical answers. Messages are kept in memory and cleared on refresh. Clinical sources have not been selected or integrated yet.
 
 ## Getting started
 
@@ -69,11 +69,16 @@ See [CHANGELOG.md](CHANGELOG.md) for notable project changes.
 ├── .gitignore                 # Files excluded from version control
 ├── LICENSE                    # Project license
 ├── backend/
+│   ├── README.md              # Backend architecture and tests
 │   ├── Dockerfile
 │   ├── .dockerignore
 │   ├── requirements.txt
 │   ├── app.py                 # Flask CLI entry point
-│   ├── psypedia/              # Application factory and API routes
+│   ├── psypedia/
+│   │   ├── __init__.py        # Application factory and provider wiring
+│   │   ├── api/               # HTTP routes and request validation
+│   │   ├── services/          # Chat orchestration
+│   │   └── providers/         # Provider contract and mock implementation
 │   └── tests/                 # Backend unit tests
 └── frontend/
     ├── Dockerfile
@@ -90,3 +95,17 @@ See [CHANGELOG.md](CHANGELOG.md) for notable project changes.
 ## API contract
 
 See [docs/openapi.yaml](docs/openapi.yaml) for the OpenAPI specification of the implemented API. For direct Flask access, use your configured `BACKEND_PORT`; the relative `/api` server uses the frontend proxy.
+
+### Mock chat endpoint
+
+`POST /api/chat` accepts a JSON object with a non-empty `message` string and returns an `answer` string explicitly marked as a mock. It does not call a model or store messages. Invalid JSON/messages return `400`; non-JSON requests return `415`, with an `error` object containing `code` and `message`.
+
+```sh
+curl --fail http://localhost:5000/api/chat \
+  -H 'Content-Type: application/json' \
+  -d '{"message":"What is psychotherapy?"}'
+```
+
+Use your configured backend port if different. The frontend is not wired to this endpoint yet.
+
+See [backend/README.md](backend/README.md) for backend architecture and testing.

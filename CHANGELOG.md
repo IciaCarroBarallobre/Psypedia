@@ -6,6 +6,8 @@ Notable changes to PsyPedia are recorded here. Unreleased changes are grouped be
 
 ### Added
 
+- Mock `POST /api/chat` endpoint with JSON validation, documented response/error contracts, and automated backend tests.
+
 - Chat interface with validated question submission, distinct user/assistant messages, and a clear disconnected-assistant notice.
 - Tailwind CSS v4, shadcn-vue controls, and automated Vue component tests.
 
@@ -24,6 +26,8 @@ Notable changes to PsyPedia are recorded here. Unreleased changes are grouped be
 - Quickstart and contribution guidelines covering development, branches, checks, and release promotion.
 
 ### Changed
+
+- Separate backend HTTP routes, chat service, and injectable mock provider while preserving the API contract.
 
 - Apply the shared navy/blue design palette through centralized light-only tokens and mobile-first chat components.
 
