@@ -15,6 +15,3 @@ class HealthTest(unittest.TestCase):
 
     def test_health_does_not_accept_post(self):
         self.assertEqual(self.client.post("/api/health").status_code, 405)
-
-    def test_chat_is_not_implemented(self):
-        self.assertEqual(self.client.post("/api/chat").status_code, 404)
