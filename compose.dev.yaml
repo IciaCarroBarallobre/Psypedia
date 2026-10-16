@@ -1,0 +1,33 @@
+# Local development: source edits reload without rebuilding images.
+services:
+  backend:
+    build: ./backend
+    command: python dev_server.py --app app run --host=0.0.0.0 --port=5000 --reload --no-debugger
+    environment:
+      DEV_BROWSER_URL: http://localhost:${BACKEND_PORT:-5000}
+    volumes:
+      - ./backend:/app # Mount local source into the container, so edits reload Flask without rebuilding.
+    ports:
+      - "127.0.0.1:${BACKEND_PORT:-5000}:5000"
+    healthcheck: # Probe Flask inside the container; no host-installed tools are needed.
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/health', timeout=3)"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+  frontend:
+    # Build frontend/Dockerfile, whose default command starts Vite.
+    build: ./frontend
+    volumes: # Vite sees local edits and updates the browser through HMR.
+      - ./frontend:/app
+      # Keep image-installed dependencies in an anonymous Docker volume,
+      # separate from host node_modules. make up renews it from the image.
+      - /app/node_modules
+    environment:
+      API_PROXY_TARGET: http://backend:5000
+      DEV_BROWSER_URL: http://localhost:${FRONTEND_PORT:-5173}
+    ports:
+      # FRONTEND_PORT optionally overrides the host port via the root .env.
+      - "127.0.0.1:${FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      backend:
+        condition: service_healthy
