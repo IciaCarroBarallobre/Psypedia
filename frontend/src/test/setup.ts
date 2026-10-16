@@ -5,4 +5,7 @@ enableAutoUnmount(afterEach)
 
 // jsdom has no layout or native scrolling.
 Element.prototype.scrollIntoView = vi.fn()
-afterEach(() => vi.clearAllMocks())
+afterEach(() => {
+  vi.clearAllMocks()
+  vi.unstubAllGlobals()
+})

@@ -6,6 +6,8 @@ Notable changes to PsyPedia are recorded here. Unreleased changes are grouped be
 
 ### Added
 
+- Connect question submission to `POST /api/chat`, displaying returned answers, pending status, and network/API errors with automated frontend coverage.
+
 - Mock `POST /api/chat` endpoint with JSON validation, documented response/error contracts, and automated backend tests.
 
 - Chat interface with validated question submission, distinct user/assistant messages, and a clear disconnected-assistant notice.

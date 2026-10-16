@@ -3,9 +3,10 @@ import { computed, ref } from 'vue'
 import { ArrowUp } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
+const props = withDefaults(defineProps<{ busy?: boolean }>(), { busy: false })
 const emit = defineEmits<{ send: [question: string] }>()
 const draft = ref('')
-const canSend = computed(() => draft.value.trim().length > 0)
+const canSend = computed(() => !props.busy && draft.value.trim().length > 0)
 function submit() {
   if (!canSend.value) return
   emit('send', draft.value.trim())
