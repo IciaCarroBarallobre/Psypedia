@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   frontend:
-    name: Frontend / build
+    name: Frontend / tests and build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -36,6 +36,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Test chat components
+        run: npm test
 
       - name: Build Vue and TypeScript
         run: npm run build

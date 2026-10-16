@@ -1,5 +1,7 @@
 import { defineConfig, loadEnv, type Plugin } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import tailwindcss from '@tailwindcss/vite'
+import { fileURLToPath, URL } from 'node:url'
 
 // Compose supplies the host URL; keep Vite's default output outside Docker.
 const browserUrl: Plugin = {
@@ -17,7 +19,8 @@ const browserUrl: Plugin = {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), 'API_PROXY_')
   return {
-    plugins: [vue(), browserUrl],
+    plugins: [vue(), tailwindcss(), browserUrl],
+    resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
     server: {
       // Allow HTTP checks from other containers on the Compose network.
       allowedHosts: ['frontend'],

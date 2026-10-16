@@ -100,7 +100,7 @@ A **Pull Request template** is provided in the repository. Complete it when open
 
 ### Continuous Integration (CI)
 
-CI runs automatically on pull requests to `main` and pushes to `main`, checking backend syntax and tests, TypeScript, the frontend build, and the Vite-to-Flask HTTP integration.
+CI runs automatically on pull requests to `main` and pushes to `main`, checking backend syntax and tests, Vue component tests, TypeScript, the frontend build, and the Vite-to-Flask HTTP integration.
 
 Run `make check` locally when possible, review CI results, and fix failures before merging. In the PR template, record which tests were performed, their results, and any pending checks. 
 
@@ -158,3 +158,17 @@ For urgent production fixes, branch from the deployed tag if necessary, then mer
 - Share configuration through `.env.example`.
 - Never commit secrets, patient information, local environments, or generated files.
 - Remember that frontend `VITE_*` variables are publicly exposed.
+
+## UI components
+
+The frontend uses Tailwind CSS v4 and shadcn-vue. Keep reusable controls in `src/components/ui/`, chat components in `src/components/chat/`, and conversation state in `src/composables/`. Import source files with the `@/` alias.
+
+To add a shadcn component from the repository root, use Docker:
+
+```sh
+docker run --rm --mount "type=bind,src=$(pwd)/frontend,dst=/app" --workdir /app node:22.23.3-alpine npx shadcn-vue@2.8.2 add button
+```
+
+Review generated files and dependency changes, then run `make setup` and `make up`. `make check` includes chat component tests and the frontend build. The current chat stores messages in memory and displays a disconnected-assistant notice; it does not call a chat API or AI service. Messages are cleared on refresh; clinical sources are not integrated.
+
+The UI is light-only and mobile-first. Brand tokens live in `frontend/src/styles/theme.css`; semantic aliases in `src/style.css` adapt them to shared controls. Use those tokens rather than component-specific hex colors. Start with small-screen styles, add wider breakpoints, and keep interactive targets at least 44px.
