@@ -1,0 +1,16 @@
+_checkouts/
+data/
+node_modules/
+dist/
+.venv/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+!.env.example
+.DS_Store
+.venv.backup/
+.pytest_cache/
+.coverage
+htmlcov/
+*.egg-info/

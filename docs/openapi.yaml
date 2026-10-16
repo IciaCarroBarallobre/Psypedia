@@ -1,0 +1,54 @@
+openapi: 3.0.3
+info:
+  title: PsyPedia API
+  version: 0.1.0
+  description: |
+    API contract for the currently implemented PsyPedia backend.
+    Only the health endpoint is available; chat is not implemented yet.
+    The contract version does not imply a published application release.
+servers:
+  - url: /api
+    description: Same-origin API through the Vite development proxy
+  - url: http://localhost:{backendPort}/api
+    description: Direct access to Flask through its published development port
+    variables:
+      backendPort:
+        default: '5000'
+        description: Set to BACKEND_PORT from the root .env if overridden.
+tags:
+  - name: Health
+    description: Backend availability
+security: []
+paths:
+  /health:
+    get:
+      tags:
+        - Health
+      operationId: getHealth
+      summary: Check backend availability
+      description: |
+        Returns a fixed status when Flask can serve the request.
+        Does not check databases, model providers, or other dependencies.
+        No authentication or request body is required.
+      responses:
+        '200':
+          description: The backend is responding.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              example:
+                status: ok
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
+          description: Backend availability status.
