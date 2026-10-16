@@ -4,7 +4,7 @@ info:
   version: 0.1.0
   description: |
     API contract for the currently implemented PsyPedia backend.
-    Only the health endpoint is available; chat is not implemented yet.
+    Health and mock chat endpoints are available. No AI model is connected.
     The contract version does not imply a published application release.
 servers:
   - url: /api
@@ -18,6 +18,8 @@ servers:
 tags:
   - name: Health
     description: Backend availability
+  - name: Chat
+    description: Mock conversation endpoint
 security: []
 paths:
   /health:
@@ -39,6 +41,39 @@ paths:
                 $ref: '#/components/schemas/HealthResponse'
               example:
                 status: ok
+  /chat:
+    post:
+      tags: [Chat]
+      operationId: sendChatMessage
+      summary: Submit a question and receive a mock answer
+      description: No model is called, no clinical answer is generated, and messages are not stored. Additional request fields are ignored.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+            example:
+              message: What is psychotherapy?
+      responses:
+        '200':
+          description: A clearly identified mock response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400':
+          description: Malformed JSON, a non-object body, or a missing, blank, or non-string message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '415':
+          description: Request Content-Type is not JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 components:
   schemas:
     HealthResponse:
@@ -52,3 +87,35 @@ components:
           enum:
             - ok
           description: Backend availability status.
+    ChatRequest:
+      type: object
+      required: [message]
+      properties:
+        message:
+          type: string
+          minLength: 1
+          pattern: '\S'
+          description: Must contain at least one non-whitespace character.
+    ChatResponse:
+      type: object
+      required: [answer]
+      additionalProperties: false
+      properties:
+        answer:
+          type: string
+          example: 'Mock response: the assistant is not connected yet. No clinical answer has been generated.'
+    ErrorResponse:
+      type: object
+      required: [error]
+      additionalProperties: false
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          additionalProperties: false
+          properties:
+            code:
+              type: string
+              enum: [invalid_json, invalid_message, unsupported_media_type]
+            message:
+              type: string
