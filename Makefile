@@ -9,7 +9,7 @@ help:
 	@echo "make logs   - Follow both services' logs; Ctrl+C stops following"
 	@echo "make ps     - Show service status and published ports"
 	@echo "make test   - Build backend image and run unit tests in a temporary container"
-	@echo "make build-frontend - Build frontend image, check TypeScript, and write frontend/dist/"
+	@echo "make build-frontend - Build frontend image, run UI tests, check TypeScript, and write frontend/dist/"
 	@echo "make check  - Run backend tests and frontend build"
 
 setup: urls
@@ -34,10 +34,10 @@ ps:
 test:
 	docker compose -f compose.dev.yaml run --rm --no-deps --build backend python -m unittest discover -s tests -v
 
-# Build first and run the frontend build without starting the backend.
+# Build first, run UI tests and compile the frontend without starting the backend.
 # The temporary container is removed; frontend/dist/ remains through the bind mount.
 build-frontend:
-	docker compose -f compose.dev.yaml run --rm --no-deps --build frontend npm run build
+	docker compose -f compose.dev.yaml run --rm --no-deps --build frontend sh -c "npm test && npm run build"
 
 # Run both verification targets (parallel execution is possible with make -j).
 check: test build-frontend

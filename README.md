@@ -1,8 +1,12 @@
 # PsyPedia
 
 **PsyPedia** is an AI-assisted knowledge platform engineered specifically for
-psychologists and mental health practitioners, strictly grounding its
-educational answers in public, well-known, and transparent clinical literature.
+psychologists and mental health practitioners, intended to provide educational
+answers grounded in curated clinical literature.
+
+## Current scope
+
+The responsive, light-mode chat lets you submit questions and displays user and assistant messages separately. It is an interface preview: the assistant is not connected to an API or model and does not generate clinical answers. Messages are kept in memory and cleared on refresh. Clinical sources have not been selected or integrated yet.
 
 ## Getting started
 
