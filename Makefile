@@ -1,4 +1,4 @@
-.PHONY: logs-ollama up-ollama ollama-pull help setup up down logs ps urls test build-frontend test-integration check
+.PHONY: evaluate-llm logs-ollama up-ollama ollama-pull help setup up down logs ps urls test build-frontend test-integration check
 
 help:
 	@printf '%s\n' \
@@ -21,6 +21,18 @@ help:
 		'  make test                Backend tests without real inference' \
 		'  make build-frontend      Frontend tests, TypeScript, and build → frontend/dist/' \
 		'  make test-integration    Vite → Flask HTTP checks; requires make up' \
+		'' \
+		'🔬 LLM evaluation — requires Ollama mode running' \
+		'  make evaluate-llm        Run synthetic cases and save a local report' \
+		'  Examples:' \
+		'    make evaluate-llm EVAL_ARGS="--list"' \
+		'    make evaluate-llm EVAL_ARGS="--execution application"  # Routing rules' \
+		'    make evaluate-llm EVAL_ARGS="--execution model"        # Real generation' \
+		'    make evaluate-llm EVAL_ARGS="--group conversation"' \
+		'    make evaluate-llm EVAL_ARGS="--case grounded-act --repeat 3"' \
+		'    make evaluate-llm EVAL_ARGS="--report evaluation/reports/REPORT.json"' \
+		'  Clear checks still require human review; real inference stays outside CI.' \
+		'  AI changes: review results and update backend/evaluation/reports/summary.md.' \
 		'' \
 		'🦙 Model tools' \
 		'  make ollama-pull         Prepare the configured model before starting the app' \
@@ -112,3 +124,9 @@ ollama-pull:
 		fi; \
 		ollama show "$$OLLAMA_MODEL" >/dev/null; \
 		echo "✅ Model $$OLLAMA_MODEL is ready."'
+
+# Explicit real inference, outside CI; requires make up with CHAT_PROVIDER=ollama.
+# Select topics/cases with EVAL_ARGS='--group emergencies' or '--case unknown-therapy --repeat 3'.
+evaluate-llm:
+	@echo "🔬 Evaluating synthetic cases against the running backend; manual review is required..."
+	@docker compose -f compose.dev.yaml exec -T backend python evaluation/run.py $(EVAL_ARGS)

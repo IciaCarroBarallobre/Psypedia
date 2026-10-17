@@ -24,13 +24,21 @@ Closes #<!-- issue number -->
 
 - **Local tests:** Done / Not done / N/A
 - **Integration tests:** Done / Not done / N/A
+- **Local LLM evaluation:** Done / Not done / N/A
+- **LLM human review:** Pending / Accepted / Rejected / N/A
 - **API / frontend manual checks:** Done / Not done / N/A
 - **CI:** Passed / Failed / Pending
+
+- [ ] For AI changes: relevant cases rerun after the latest change, raw answers reviewed, and `backend/evaluation/reports/summary.md` updated with results, failures, and pending reviews.
+
+**LLM report summary:** <!-- Link to the updated backend/evaluation/reports/summary.md, or N/A. -->
+
+<!-- Required for model, prompt, knowledge, retrieval, guard, history, provider, or generation-option changes. Follow backend/README.md#evaluation-summaries. The summary describes evaluation results; include failures and pending human review without claiming approval. Update it again after further AI changes. -->
 
 **Commands, results, and pending checks:**
 
 ```text
-<!-- Commands executed, CI link, and reasons for any tests not performed -->
+<!-- Commands/results, CI link, and pending checks; link the evaluation summary above for AI findings. -->
 ```
 
 ## Clinical Safety & Privacy (if applicable)
