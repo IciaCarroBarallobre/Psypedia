@@ -203,6 +203,15 @@ class DemoKnowledgeTest(unittest.TestCase):
                     self.assertEqual(call.kwargs["history"], expected_history)
                 self.assertEqual(history[3], {"role": "assistant", "content": old_limit})
 
+    def test_patient_therapy_questions_are_blocked_before_category_retrieval(self):
+        for message in ("Terapias para mi paciente con ansiedad", "Quiero conocer enfoques terapéuticos para mi cliente"):
+            with self.subTest(message=message):
+                knowledge = Mock(wraps=self.knowledge)
+                answer = ChatService(self.provider, knowledge).answer(message)
+                self.assertIn("no compartas", answer)
+                self.assertNotIn("112", answer)
+                self.provider.answer.assert_not_called()
+                knowledge.retrieve.assert_not_called()
 
     def test_only_requested_cards_and_their_references_are_used(self):
         answer = self.service.answer("Compara ACT y DBT")
@@ -298,6 +307,21 @@ class DemoKnowledgeTest(unittest.TestCase):
                     if topic["id"] != "precision":
                         self.assertNotIn(topic["source_url"], answer)
 
+    def test_mixed_queries_keep_privacy_and_emergency_routing_ahead_of_retrieval(self):
+        for message, expected, emergency in (
+            ("Mi paciente pregunta por ACT y la terapia de Cualalumpur", "no compartas", False),
+            ("Mi paciente quiere suicidarse. Compara ACT con la terapia de Cualalumpur", "protocolo", True),
+        ):
+            with self.subTest(message=message):
+                knowledge = Mock(wraps=self.knowledge)
+                answer = ChatService(self.provider, knowledge).answer(message)
+                self.assertIn(expected, answer)
+                if emergency:
+                    self.assertIn("112", answer)
+                else:
+                    self.assertNotIn("112", answer)
+                self.provider.answer.assert_not_called()
+                knowledge.retrieve.assert_not_called()
 
     def test_partial_notice_does_not_hide_repeated_generated_body_from_history(self):
         from psypedia.services.chat import PARTIAL_INFORMATION
@@ -374,3 +398,59 @@ class DemoKnowledgeTest(unittest.TestCase):
                 self.assertTrue(topic["source_url"].startswith("https://"))
                 self.assertTrue(topic["source_title"])
                 self.assertTrue(topic["checked_on"])
+
+    def test_educational_sensitive_questions_need_explicit_card_coverage(self):
+        for message in ("¿Qué dice DBT sobre la autolesión?", "¿Qué dice ACT sobre prevención del suicidio?"):
+            with self.subTest(message=message):
+                answer = self.service.answer(message)
+                self.assertIn("No tengo información suficiente", answer)
+                self.assertNotIn("112", answer)
+                self.assertNotIn("datos personales", answer)
+                self.provider.answer.assert_not_called()
+
+    def test_educational_question_ends_previous_emergency_routing(self):
+        answer = self.service.answer("¿Qué dice DBT sobre autolesión?", history=[
+            {"role": "user", "content": "creo que hay riesgo de suicidio"},
+        ])
+        self.assertIn("No tengo información suficiente", answer)
+        self.assertNotIn("112", answer)
+        self.provider.answer.assert_not_called()
+
+    def test_declared_sensitive_coverage_allows_selected_facts_to_reach_provider(self):
+        knowledge = Mock()
+        knowledge.retrieve.return_value = [{
+            "name": "Synthetic topic", "summary": "Synthetic reference content",
+            "covered_topics": ["suicide"], "source_title": "Synthetic source",
+            "source_url": "https://example.org/synthetic",
+        }]
+        answer = ChatService(self.provider, knowledge).answer("Información educativa sobre suicidio")
+        self.assertTrue(answer.startswith("Answer from context"))
+        self.assertIn("Synthetic reference content", self.provider.answer.call_args.kwargs["system_prompt"])
+        self.provider.answer.assert_called_once()
+
+    def test_short_follow_up_cannot_bypass_sensitive_coverage(self):
+        answer = self.service.answer("cuéntame más", history=[
+            {"role": "user", "content": "¿Qué dice DBT sobre la autolesión?"},
+            {"role": "assistant", "content": "No tengo información suficiente sobre ese aspecto para darte una respuesta fiable."},
+        ])
+        self.assertIn("No tengo información suficiente", answer)
+        self.provider.answer.assert_not_called()
+
+    def test_new_topic_does_not_inherit_old_coverage_restrictions(self):
+        answer = self.service.answer("¿Qué es ACT?", history=[
+            {"role": "user", "content": "¿Qué dice DBT sobre la autolesión?"},
+        ])
+        self.assertTrue(answer.startswith("Answer from context"))
+        self.provider.answer.assert_called_once()
+
+    def test_general_injury_question_is_not_a_privacy_warning_or_emergency_after_patient_case(self):
+        answer = self.service.answer("que dice dbt sobre lesiones?", history=[
+            {"role": "user", "content": "Mi paciente se llama Persona Ficticia"},
+            {"role": "assistant", "content": "Por favor, no compartas información de pacientes."},
+            {"role": "user", "content": "creo que hay riesgo de suicidio"},
+        ])
+        self.assertIn("No tengo información suficiente", answer)
+        self.assertNotIn("112", answer)
+        self.assertNotIn("no compartas", answer)
+        self.assertNotIn("Persona Ficticia", answer)
+        self.provider.answer.assert_not_called()

@@ -3,6 +3,8 @@
 import re
 from time import monotonic
 
+from .emergency import emergency_response, PATIENT_TERM_ES, PATIENT_TERM_EN
+
 from psypedia.providers import ChatProvider, ProviderInvalidResponse
 from psypedia.knowledge import KnowledgeBase, has_unsupported_name, normalize
 from psypedia.prompting import build_context, build_system_prompt
@@ -20,6 +22,20 @@ PARTIAL_INFORMATION = (
     "No tengo información suficiente sobre todos los términos que mencionas. "
     "Puedo explicarte la parte documentada, sin dar por hecho que sean equivalentes."
 )
+# Conservative prototype rules, not anonymisation or comprehensive PII detection.
+_PATIENT_DATA = re.compile(
+    rf"\b(?:(?:mi|este|esta|su|un|una|el|la) {PATIENT_TERM_ES}|{PATIENT_TERM_ES} se llama|"
+    rf"nombre del {PATIENT_TERM_ES}|historia clinica|dni|my {PATIENT_TERM_EN}|patient name|client name|medical record)\b"
+)
+_CONTACT_DATA = re.compile(r"[\w.+-]+@[\w.-]+\.[a-zA-Z]{2,}|(?:\+?\d[ .()-]*){9,}")
+# Coverage is declared in reviewed card metadata, not inferred from a keyword in
+# its summary: merely mentioning a sensitive subject is not supporting evidence.
+_SENSITIVE_TOPICS = {
+    "suicide": re.compile(r"\b(?:suicid\w*|quitar(?:se|me|te) la vida)\b"),
+    "injury": re.compile(r"\b(?:lesion\w*|lexion\w*|dano\w*)\b"),
+    "self_harm": re.compile(r"\b(?:autoles\w*|auto les\w*|self harm\w*|self injur\w*)\b"),
+}
+
 _AGREEMENTS = {"si", "vale", "ok", "de acuerdo", "yes", "sure"}
 _ACKNOWLEDGEMENTS = _AGREEMENTS | {
     "ni idea", "no se", "no se por donde empezar", "lo que quieras",
@@ -30,6 +46,10 @@ _FOLLOW_UPS = _AGREEMENTS | {
 }
 
 
+def _patient_information(text: str) -> bool:
+    return bool(_PATIENT_DATA.search(normalize(text)) or _CONTACT_DATA.search(text))
+
+
 class ChatService:
     def __init__(self, provider: ChatProvider, knowledge_base: KnowledgeBase | None = None):
         self.provider = provider
@@ -37,6 +57,24 @@ class ChatService:
 
     def answer(self, message: str, *, history: list[dict[str, str]] | None = None) -> str:
         text = normalize(message)
+        urgent_reply = emergency_response(message, history=history)
+        if urgent_reply is not None:
+            return urgent_reply
+        if _patient_information(message):
+            warning = (
+                "Por favor, no compartas información de pacientes ni datos personales en este chat. "
+                "Reformula la consulta como una pregunta general, sin casos individuales. "
+                "Para retirar los datos del historial visible, recarga la página."
+            )
+            return warning
+        # Do not let an earlier patient case block a new general question, or
+        # forward the case/its immediate assistant replies to the provider.
+        unsafe_turns = [index for index, turn in enumerate(history or []) if _patient_information(turn["content"])]
+        if unsafe_turns:
+            start = unsafe_turns[-1] + 1
+            while start < len(history) and history[start]["role"] != "user":
+                start += 1
+            history = history[start:]
         provider_options = {"history": history} if history else {}
         if self.knowledge_base is None:
             return self.provider.answer(message, **provider_options)
@@ -72,6 +110,18 @@ class ChatService:
         topics = [topic for topic in topics if topic["summary"]]
         if not topics:
             return MISSING_INFORMATION
+        coverage_question = message
+        if text in _FOLLOW_UPS:
+            for turn in reversed(history or []):
+                if turn["role"] == "user" and normalize(turn["content"]) not in _FOLLOW_UPS:
+                    coverage_question += " " + turn["content"]
+                    break
+        requested_topics = {name for name, pattern in _SENSITIVE_TOPICS.items() if pattern.search(normalize(coverage_question))}
+        covered_topics = {name for topic in topics for name in topic.get("covered_topics", [])}
+        if requested_topics - covered_topics:
+            return (
+                "No tengo información suficiente sobre ese aspecto para darte una respuesta fiable."
+            )
         # Keep routing/topic context, but do not feed obsolete application
         # abstentions back as model memory when reference content is available.
         model_history = [turn for turn in (history or []) if not (

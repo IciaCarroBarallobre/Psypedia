@@ -119,3 +119,115 @@ class ChatServiceTest(unittest.TestCase):
                 {"role": "assistant", "content": "Previous answer"},
             ])
         provider.answer.assert_called_once()
+
+    def test_patient_case_or_contact_data_is_not_forwarded_to_the_provider(self):
+        for message in (
+            "Mi paciente se llama Persona Ficticia y quiere saber de ACT",
+            "Un paciente tiene ansiedad, ¿le aplico ACT?",
+            "My patient is asking about ACT",
+            "Oh no te voy a contar secretos sobre el paciente",
+            "Mi cliente es malvado muajaja se llama Persona Ficticia",
+            "Mi clienta se llama Persona Ficticia y quiere saber de ACT",
+            "My client is called Persona Ficticia and is asking about ACT",
+            "Escríbeme a ejemplo@example.org sobre ACT",
+            "El teléfono es +34 600 000 000, explícame ACT",
+        ):
+            with self.subTest(message=message):
+                provider, knowledge = Mock(), Mock()
+                knowledge.retrieve.return_value = []
+                answer = ChatService(provider, knowledge).answer(message)
+                self.assertIn("Por favor, no compartas información de pacientes", answer)
+                self.assertNotIn("Persona Ficticia", answer)
+                provider.answer.assert_not_called()
+                knowledge.retrieve.assert_not_called()
+
+    def test_detected_patient_history_is_excluded_without_blocking_new_general_question(self):
+        from psypedia.knowledge import DemoKnowledgeBase
+        provider = Mock(spec=ChatProvider)
+        provider.answer.return_value = "Educational answer"
+        answer = ChatService(provider, DemoKnowledgeBase()).answer("Qué es ACT", history=[
+            {"role": "user", "content": "Mi paciente se llama Persona Ficticia"},
+            {"role": "assistant", "content": "Respuesta sobre Persona Ficticia"},
+        ])
+        self.assertTrue(answer.startswith("Educational answer"))
+        self.assertNotIn("Persona Ficticia", str(provider.answer.call_args))
+        self.assertNotIn("history", provider.answer.call_args.kwargs)
+
+    def test_safe_conversation_after_patient_case_can_continue(self):
+        from psypedia.knowledge import DemoKnowledgeBase
+        provider = Mock(spec=ChatProvider)
+        provider.answer.return_value = "New explanation"
+        safe_history = [
+            {"role": "user", "content": "Qué es ACT"},
+            {"role": "assistant", "content": "ACT trata de flexibilidad psicológica"},
+        ]
+        ChatService(provider, DemoKnowledgeBase()).answer("cuéntame más", history=[
+            {"role": "user", "content": "Mi paciente se llama Persona Ficticia"},
+            {"role": "assistant", "content": "Respuesta sobre Persona Ficticia"},
+            *safe_history,
+        ])
+        self.assertEqual(provider.answer.call_args.kwargs["history"], safe_history)
+        self.assertNotIn("Persona Ficticia", str(provider.answer.call_args))
+
+    def test_patient_information_with_danger_prioritizes_human_help(self):
+        provider = Mock()
+        answer = ChatService(provider).answer("Mi paciente Persona Ficticia quiere suicidarse")
+        self.assertIn("protocolo", answer)
+        self.assertIn("valoración clínica", answer)
+        self.assertIn("112", answer)
+        self.assertIn("Si hay peligro inmediato", answer)
+        self.assertNotIn("Persona Ficticia", answer)
+        self.assertNotIn("recarga la página", answer)
+        provider.answer.assert_not_called()
+
+    def test_negated_or_academic_client_risk_keeps_privacy_without_emergency_escalation(self):
+        for message in (
+            "Mi cliente se llama Persona Ficticia y no va a matarse.",
+            "Mi clienta se llama Persona Ficticia y ya no quiere suicidarse.",
+            "Mi cliente se llama Persona Ficticia y va a matarse de risa con ese chiste.",
+            "My client is not going to kill themselves.",
+        ):
+            with self.subTest(message=message):
+                provider, knowledge = Mock(), Mock()
+                knowledge.retrieve.return_value = []
+                answer = ChatService(provider, knowledge).answer(message)
+                self.assertIn("no compartas", answer)
+                self.assertNotIn("112", answer)
+                self.assertNotIn("Persona Ficticia", answer)
+                provider.answer.assert_not_called()
+                knowledge.retrieve.assert_not_called()
+
+    def test_general_question_after_named_client_risk_excludes_private_history(self):
+        from psypedia.knowledge import DemoKnowledgeBase
+        provider = Mock(spec=ChatProvider)
+        provider.answer.return_value = "Explicación educativa de ACT."
+        history = [
+            {"role": "user", "content": "Mi cliente se llama Persona Ficticia y va a matarse"},
+            {"role": "assistant", "content": "Sigue el protocolo del centro; no compartas datos identificativos."},
+        ]
+        answer = ChatService(provider, DemoKnowledgeBase()).answer("Ahora una pregunta general: ¿qué es ACT?", history=history)
+        self.assertTrue(answer.startswith("Explicación educativa de ACT."))
+        self.assertNotIn("112", answer)
+        provider.answer.assert_called_once()
+        self.assertNotIn("history", provider.answer.call_args.kwargs)
+        self.assertNotIn("Persona Ficticia", str(provider.answer.call_args))
+
+    def test_general_sensitive_question_after_named_client_risk_is_not_a_new_crisis(self):
+        from psypedia.knowledge import DemoKnowledgeBase
+        provider = Mock(spec=ChatProvider)
+        answer = ChatService(provider, DemoKnowledgeBase()).answer("¿Qué dice DBT sobre la autolesión?", history=[
+            {"role": "user", "content": "Mi cliente se llama Persona Ficticia y va a matarse"},
+            {"role": "assistant", "content": "Activa el protocolo del centro."},
+        ])
+        self.assertIn("No tengo información suficiente", answer)
+        self.assertNotIn("112", answer)
+        self.assertNotIn("no compartas", answer)
+        provider.answer.assert_not_called()
+
+    def test_general_educational_questions_are_not_treated_as_patient_records(self):
+        from psypedia.knowledge import DemoKnowledgeBase
+        provider = Mock(spec=ChatProvider)
+        provider.answer.return_value = "Educational answer"
+        answer = ChatService(provider, DemoKnowledgeBase()).answer("Qué es ACT")
+        self.assertTrue(answer.startswith("Educational answer"))
+        provider.answer.assert_called_once()
