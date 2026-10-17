@@ -2,9 +2,22 @@
 
 Notable changes to PsyPedia are recorded here. Unreleased changes are grouped below; published releases will use version numbers and release dates.
 
+## Table of Contents
+
+- [Unreleased](#unreleased)
+  - [Added](#added)
+  - [Changed](#changed)
+
 ## [Unreleased]
 
 ### Added
+
+- Local Ollama generation in Docker, with configurable models, automatic model preparation, persistent downloads, and controlled service errors.
+- Demo knowledge cards for CBT, ACT, DBT, and Precision Psychology, with source links, category-based therapy overviews, and partial answers that explain available information while stating its limits.
+- Patient-information warnings and help redirection before inference, combining subject, harm, intention, and context signals without assessing clinical risk.
+- Recent conversation history for follow-up questions, without backend persistence.
+- Spanish chat interface with a welcome message, animated loading feedback, and automatic scrolling that respects the reader's position.
+- Synthetic evaluation cases and reports with a shared [results summary](backend/evaluation/reports/summary.md), automated backend coverage, and documentation of LLM behavior and limitations.
 
 - Connect question submission to `POST /api/chat`, displaying returned answers, pending status, and network/API errors with automated frontend coverage.
 
@@ -28,6 +41,12 @@ Notable changes to PsyPedia are recorded here. Unreleased changes are grouped be
 - Quickstart and contribution guidelines covering development, branches, checks, and release promotion.
 
 ### Changed
+
+- Gate generation on available knowledge cards; unknown topics receive an explicit limitation, detected patient information is blocked before inference, and emergencies retain human-help redirection. Ollama is instructed to rewrite selected facts only.
+
+- Limit Docker Ollama to one resident model to reduce memory contention between evaluation and application models.
+
+- Require explicit configuration in a local `.env` created from `.env.example`, without Compose/backend fallback values; mock mode needs no Ollama settings, and CI creates the file before integration checks.
 
 - Separate backend HTTP routes, chat service, and injectable mock provider while preserving the API contract.
 

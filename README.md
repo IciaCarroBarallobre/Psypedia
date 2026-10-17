@@ -1,111 +1,86 @@
 # PsyPedia
 
-**PsyPedia** is an AI-assisted knowledge platform engineered specifically for
-psychologists and mental health practitioners, intended to provide educational
-answers grounded in curated clinical literature.
+An educational psychology assistant for mental health professionals.
+
+## Table of Contents
+
+- [Current scope](#current-scope)
+- [Getting started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Quickstart](#quickstart)
+- [Repository structure](#repository-structure)
+- [Further reading](#further-reading)
 
 ## Current scope
 
-The responsive, light-mode chat lets you submit questions and displays user and assistant messages separately. It is an interface preview: the frontend calls the Flask chat API, which returns an explicit mock answer without a model or clinical answer generation. Messages are kept in memory and cleared on refresh. Clinical sources have not been selected or integrated yet.
+The Vue chat connects to Flask and a small public-source demo knowledge base.
+Ollama generates answers locally in Docker; mock mode works without a model.
+This prototype is not clinically validated. Clinical manuals and semantic RAG
+are not integrated, and conversations are cleared on refresh. Use synthetic data only.
 
 ## Getting started
 
-Development, testing, and builds run entirely inside Docker for both
-the frontend and backend.
-
 ### Prerequisites
 
-- [Docker Engine](https://docs.docker.com/engine/install/) with Compose v2
-  or [Docker Desktop](https://www.docker.com/products/docker-desktop/) running.
-- An active Internet connection (required for the initial build to download base
-  images and dependencies).
+- Docker with Compose v2, running.
+- Git and Make.
+- Internet access for initial images, dependencies, and model downloads.
 
 ### Quickstart
 
-1. **[Optional] Configure local development**:
+From the repository root:
 
-    ```sh
-        cp .env.example .env # run this from its root if you need custom ports
-    ```
+1. Create the local configuration:
 
-2. **Start containers**:
+   ```sh
+   cp .env.example .env
+   ```
 
-    ```sh
-    make up
-    ```
+   Choose `CHAT_PROVIDER=ollama` or `mock` and adjust ports/model as needed.
+   `.env` is required and ignored by Git; `OLLAMA_*` settings are needed only for Ollama.
 
-3. **Access the application**: Open [PsyPedia](http://localhost:5173) in your browser.
-   If you changed the ports, adjust this URL and the health-check URLs below.
+2. Start the application:
 
-4. Check Flask directly and through the Vite proxy:
+   ```sh
+   make up
+   ```
 
-    ```sh
-    curl --fail http://localhost:5000/api/health
-    curl --fail http://localhost:5173/api/health
-    ```
+   Ollama mode prepares the model before starting the app; the first download
+   can take several minutes. Mock mode skips Ollama and model downloads.
 
-    Both should return `{"status":"ok"}`.
+3. Open [PsyPedia](http://localhost:5173). Use your configured port if different;
+   `make urls` shows the browser addresses. Keep the containers running while editing.
 
-5. Other useful commands: `make help`
-
-### Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup, everyday commands,
-checks, and our branching and release workflow.
-
-See [CHANGELOG.md](CHANGELOG.md) for notable project changes.
+Use `make help` for commands and [CONTRIBUTING](CONTRIBUTING.md#local-development)
+for everyday development.
 
 ## Repository structure
 
 ```text
 .
-├── README.md                  # Project overview and quickstart
-├── CONTRIBUTING.md            # Development setup, branches, releases, and checks
-├── CHANGELOG.md               # Notable changes and release history
-├── Makefile                   # Docker development shortcuts
-├── compose.dev.yaml           # Local development containers, mounts, and reload
-├── .env.example               # Optional development port configuration
-├── .editorconfig              # Editor conventions
-├── .gitignore                 # Files excluded from version control
-├── LICENSE                    # Project license
-├── backend/
-│   ├── README.md              # Backend architecture and tests
-│   ├── Dockerfile
-│   ├── .dockerignore
-│   ├── requirements.txt
-│   ├── app.py                 # Flask CLI entry point
-│   ├── psypedia/
-│   │   ├── __init__.py        # Application factory and provider wiring
-│   │   ├── api/               # HTTP routes and request validation
-│   │   ├── services/          # Chat orchestration
-│   │   └── providers/         # Provider contract and mock implementation
-│   └── tests/                 # Backend unit tests
-└── frontend/
-    ├── Dockerfile
-    ├── .dockerignore
-    ├── .npmrc
-    ├── package.json
-    ├── package-lock.json
-    ├── tsconfig.json
-    ├── vite.config.ts         # Vue integration and development API proxy
-    ├── index.html
-    └── src/                   # Vue application
+├── README.md                 # Overview and quickstart
+├── CONTRIBUTING.md           # Development and review workflow
+├── CHANGELOG.md              # Notable changes
+├── Makefile                  # Development commands
+├── compose.dev.yaml          # Frontend/backend development services
+├── compose.ollama.yaml       # Ollama service and inference settings
+├── .env.example              # Local configuration template
+├── .github/                  # CI and pull request template
+├── docs/openapi.yaml         # API contract
+├── backend/                  # Flask, knowledge cards, prompting, and providers
+│   ├── tests/                # Deterministic backend tests
+│   └── evaluation/           # Opt-in real-model evaluation
+├── frontend/                 # Vue, TypeScript, and shared UI components
+└── tests/integration/        # Vite-to-Flask HTTP checks
 ```
 
-## API contract
+## Further reading
 
-See [docs/openapi.yaml](docs/openapi.yaml) for the OpenAPI specification of the implemented API. For direct Flask access, use your configured `BACKEND_PORT`; the relative `/api` server uses the frontend proxy.
-
-### Mock chat endpoint
-
-`POST /api/chat` accepts a JSON object with a non-empty `message` string and returns an `answer` string explicitly marked as a mock. It does not call a model or store messages. Invalid JSON/messages return `400`; non-JSON requests return `415`, with an `error` object containing `code` and `message`.
-
-```sh
-curl --fail http://localhost:5000/api/chat \
-  -H 'Content-Type: application/json' \
-  -d '{"message":"What is psychotherapy?"}'
-```
-
-Use your configured backend port if different. The frontend sends questions to this endpoint through the Vite proxy and displays returned answers or visible errors.
-
-See [backend/README.md](backend/README.md) for backend architecture and testing.
+- [Contributing](CONTRIBUTING.md): commands, checks, branches, and release process.
+- [Backend](backend/README.md): architecture, Ollama startup, and evaluation.
+- [LLM and prompting](backend/LLM_AND_PROMPTING.md): decision flow and model limitations.
+- [LLM evaluation results](backend/evaluation/reports/summary.md): tested scope, findings, and pending review;
+  follow the [summary workflow](backend/README.md#evaluation-summaries) when changing AI behavior.
+- [Demo knowledge](backend/psypedia/knowledge/README.md): available topics and public sources.
+- [OpenAPI](docs/openapi.yaml): request, response, and error contracts.
+- [Changelog](CHANGELOG.md): notable changes.
