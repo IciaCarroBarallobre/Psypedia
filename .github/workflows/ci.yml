@@ -77,12 +77,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
+      CHAT_PROVIDER: mock
       COMPOSE_PROJECT_NAME: psypedia-integration
-      FRONTEND_PORT: '5173'
-      BACKEND_PORT: '5000'
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Create local configuration
+        run: cp .env.example .env
 
       - name: Start Docker services
         run: docker compose -f compose.dev.yaml up --build --wait --wait-timeout 120

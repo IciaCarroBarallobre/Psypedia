@@ -5,7 +5,7 @@ from psypedia import create_app
 
 class HealthTest(unittest.TestCase):
     def setUp(self):
-        self.client = create_app({"TESTING": True}).test_client()
+        self.client = create_app({"TESTING": True, "CHAT_PROVIDER": "mock"}).test_client()
 
     def test_health(self):
         response = self.client.get("/api/health")

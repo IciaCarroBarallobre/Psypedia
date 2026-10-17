@@ -1,0 +1,88 @@
+[
+  {
+    "id": "cbt",
+    "category": "psychotherapy",
+    "name": "Cognitive Behavioral Therapy (CBT)",
+    "aliases": [
+      "CBT",
+      "TCC",
+      "cognitive behavioral therapy",
+      "cognitive behavioural therapy",
+      "cognitive therapy",
+      "terapia cognitivo-conductual",
+      "terapia cognitivo conductual",
+      "terapia cognitiva conductual",
+      "terapia cognitiva"
+    ],
+    "summary": "Cognitive Behavioral Therapy (CBT) is an established family of psychological interventions situated within the cognitive and behavioral traditions of psychotherapy. It examines the interactions between situations, interpretations, thoughts, emotions, physiological reactions, and behaviors. Its central premise is that patterns of thinking and behavior can contribute to the development or maintenance of psychological difficulties and can be addressed through structured psychological interventions. Common CBT concepts include cognitive appraisal, automatic thoughts, underlying beliefs, behavioral avoidance, reinforcement, and the relationships between cognition and action. Examples of methods described in CBT include examining unhelpful thoughts, considering alternative interpretations, behavioral activation, and gradually changing patterns of avoidance. Between-session practice is frequently used to apply what is learned. CBT is not one fixed protocol, and its specific techniques depend on the problem and treatment model. In relation to Acceptance and Commitment Therapy (ACT), both draw on behavioral principles and seek meaningful behavioral change. However, traditional cognitive approaches within CBT may place greater emphasis on examining or modifying the content and usefulness of thoughts, whereas ACT places particular emphasis on changing the relationship individuals have with their thoughts. CBT also shares behavioral and skills-based foundations with Dialectical Behavior Therapy (DBT), which incorporates additional dialectical, acceptance-based, and mindfulness-oriented principles within a comprehensive treatment model. Precision Psychology differs in scope: rather than being another psychotherapy modality, it investigates how individual and contextual differences might inform psychological research and the understanding of intervention responses. CBT can therefore be understood as a therapeutic family, while Precision Psychology provides a broader research perspective that may examine variation in outcomes across therapeutic approaches. These comparisons describe general conceptual distinctions, not absolute divisions between schools. This entry provides educational knowledge only and does not include detailed treatment protocols, effectiveness rankings, or patient-specific recommendations.",
+    "source_title": "NHS — Cognitive behavioural therapy (CBT)",
+    "source_url": "https://www.nhs.uk/tests-and-treatments/cognitive-behavioural-therapy-cbt/",
+    "checked_on": "2026-10-16",
+    "covered_topics": []
+  },
+  {
+    "id": "act",
+    "category": "psychotherapy",
+    "name": "Acceptance and Commitment Therapy (ACT)",
+    "aliases": [
+      "ACT",
+      "acceptance and commitment therapy",
+      "acceptance commitment therapy",
+      "psychological flexibility",
+      "terapia de aceptación y compromiso",
+      "terapia de aceptacion y compromiso",
+      "aceptación y compromiso",
+      "aceptacion y compromiso",
+      "flexibilidad psicológica"
+    ],
+    "summary": "Acceptance and Commitment Therapy (ACT) is a contextual behavioral approach to psychological intervention and behavior change. It is situated within contextual behavioral science and draws on functional contextualism, behavioral learning principles, and Relational Frame Theory. Its central objective is psychological flexibility: the capacity to remain in contact with present experience while adapting behavior in ways that are consistent with personally chosen values. The Association for Contextual Behavioral Science describes six interrelated processes: acceptance, cognitive defusion, present-moment awareness, self-as-context, values, and committed action. Acceptance involves openness to difficult internal experiences when attempts to control them are unhelpful. Cognitive defusion concerns changing how thoughts influence behavior rather than necessarily disputing or eliminating their content. Present-moment awareness emphasizes flexible attention to current experience. Self-as-context involves perspective-taking and observing experiences without defining oneself entirely through them. Values provide meaningful directions for behavior, while committed action concerns developing patterns of behavior consistent with those directions. ACT shares behavioral foundations with CBT and DBT and can use exercises involving exposure, awareness, and changes in everyday behavior. Its distinguishing emphasis is on the function of psychological experiences and behaviors, rather than assuming that reducing or replacing unwanted thoughts is always the central goal. Compared with traditional cognitive restructuring in CBT, ACT often emphasizes changing the relationship to thoughts instead of evaluating their factual accuracy. Compared with DBT, ACT places psychological flexibility and values-based action at the center of its conceptual model, while DBT organizes its treatment around a broader dialectical framework and structured skills and treatment functions. Both ACT and DBT incorporate acceptance, behavioral change, and mindfulness-related processes, although they conceptualize and organize them differently. Precision Psychology is not a competing treatment model; it studies individual and contextual variability in psychological needs and responses, potentially including responses to ACT. ACT is therefore best understood as a specific contextual behavioral approach within psychotherapy, rather than a general theory of personalized treatment selection. These distinctions are educational and do not establish that one approach is superior to another. This entry excludes clinical protocols, comparative effectiveness claims, and patient-specific treatment recommendations.",
+    "source_title": "ACBS — About ACT",
+    "source_url": "https://contextualscience.org/about_act",
+    "checked_on": "2026-10-16",
+    "covered_topics": []
+  },
+  {
+    "id": "dbt",
+    "category": "psychotherapy",
+    "name": "Dialectical Behavior Therapy (DBT)",
+    "aliases": [
+      "DBT",
+      "dialectical behavior therapy",
+      "dialectical behaviour therapy",
+      "dialectical therapy",
+      "dialectical behavioral therapy",
+      "terapia dialéctico-conductual",
+      "terapia dialectico conductual",
+      "terapia dialéctica conductual",
+      "terapia dialectica conductual",
+      "terapia dialéctica comportamental",
+      "terapia dialectica comportamental"
+    ],
+    "summary": "Dialectical Behavior Therapy (DBT) is a structured, comprehensive psychotherapy approach developed within the cognitive-behavioral tradition. Its theoretical foundations integrate behavioral principles with dialectical thinking, acceptance, and mindfulness. A central feature of DBT is the balance between acceptance and change: recognizing present experiences while working toward meaningful behavioral change. Behavioral Tech describes four principal areas of DBT skills: mindfulness, distress tolerance, emotion regulation, and interpersonal effectiveness. Mindfulness concerns attentive awareness of present experience. Distress tolerance focuses on navigating difficult situations and emotional distress without relying on ineffective reactions. Emotion regulation concerns understanding and responding to emotional processes, while interpersonal effectiveness addresses communication, relationships, and the pursuit of interpersonal goals. Standard outpatient DBT is a comprehensive treatment model that commonly includes individual psychotherapy, skills training, between-session phone coaching, and consultation teams for therapists. These treatment components are distinct from the four skills areas. DBT shares important roots with CBT, particularly its attention to learning, behavioral patterns, skills acquisition, and practical changes in behavior. However, DBT gives explicit emphasis to dialectical balance, validation, acceptance, and multiple coordinated treatment functions. Compared with ACT, DBT shares mindfulness, acceptance, and behavior-change principles, but its organization around specific skills areas and comprehensive treatment modes differs from ACT's emphasis on psychological flexibility and values-guided action. The approaches may discuss similar experiences using different theoretical concepts and intervention structures. Precision Psychology occupies a different level: it is a research perspective concerned with individual variability, contextual influences, and possible differences in responses to psychological interventions, rather than a DBT alternative or a separate skills-based psychotherapy. DBT should therefore be understood as a particular psychotherapy approach within the broader cognitive-behavioral tradition, with its own conceptual framework and treatment structure. This educational entry does not teach specialized DBT protocols, establish comparative treatment efficacy, or provide patient-specific risk assessments or intervention recommendations.",
+    "source_title": "Behavioral Tech Institute — What is DBT?",
+    "source_url": "https://behavioraltech.org/dialectical-behavior-therapy-dbt/",
+    "checked_on": "2026-10-16",
+    "covered_topics": []
+  },
+  {
+    "id": "precision",
+    "category": "research",
+    "name": "Precision Psychology",
+    "aliases": [
+      "precision psychology",
+      "precision psychological science",
+      "precision mental health",
+      "precision approaches in psychology",
+      "individual differences in psychological interventions",
+      "psicología de precisión",
+      "psicologia de precision",
+      "psicología personalizada",
+      "psicologia personalizada"
+    ],
+    "summary": "Precision Psychology is an emerging research paradigm concerned with understanding how psychological processes, mental health needs, and responses to interventions vary across individuals and contexts. It is not a standalone psychotherapy school comparable to CBT, ACT, or DBT. Rather, it represents a broader approach to psychological research that questions whether findings based primarily on group averages are sufficient to explain differences between individuals. Purgato and colleagues describe the potential of a precision psychology paradigm in global mental health, emphasizing the importance of individual clinical and sociodemographic characteristics as well as social determinants of mental health. This perspective encourages researchers to examine variability in outcomes, contextual influences, and the potential identification and validation of predictors associated with different responses to interventions. Relevant research themes include individual differences, measurement, heterogeneity of treatment response, contextual and environmental factors, and the methodological challenges of moving from population-level evidence toward more informative individual-level predictions. Such predictions require appropriate research designs, reliable data, and independent validation; they should not be assumed to be accurate simply because they are personalized. Precision Psychology connects with CBT, ACT, and DBT by asking research questions about how different people may experience psychological difficulties, respond to therapeutic processes, or benefit differently from interventions. However, it does not replace the theories, methods, or professional requirements of those therapeutic approaches. CBT examines cognitive and behavioral processes; ACT focuses on psychological flexibility within contextual behavioral science; DBT combines behavioral change with acceptance and dialectical principles; Precision Psychology investigates variability and the possible relevance of individual and contextual characteristics across such approaches. It also relates to evidence-based practice in psychology, which integrates research evidence, professional expertise, and individual characteristics, culture, and preferences. Precision Psychology places particular research emphasis on improving the understanding and prediction of individual differences, but its aims should not be confused with an already validated system for choosing treatment for specific patients. For PsyPedia, this topic supports educational exploration of the research paradigm, methodological considerations, and its conceptual relationships with psychotherapy. It does not provide psychological profiling, predictive scores, individualized treatment selection, clinical protocols, or validated patient-specific recommendations.",
+    "source_title": "Purgato et al. (2021) — Moving beyond a 'one-size-fits-all' rationale in global mental health: prospects of a precision psychology paradigm",
+    "source_url": "https://doi.org/10.1017/S2045796021000500",
+    "checked_on": "2026-10-16",
+    "covered_topics": []
+  }
+]

@@ -2,8 +2,9 @@
 
 
 class MockChatProvider:
-    def answer(self, message: str) -> str:
+    def answer(self, message: str, *, system_prompt: str | None = None,
+               history: list[dict[str, str]] | None = None) -> str:
         return (
-            "Mock response: the assistant is not connected yet. "
-            "No clinical answer has been generated."
+            "Respuesta de demostración (mock): no se ha consultado ningún modelo de IA "
+            "ni se ha generado una respuesta clínica."
         )

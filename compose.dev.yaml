@@ -2,13 +2,15 @@
 services:
   backend:
     build: ./backend
+    env_file: .env
     command: python dev_server.py --app app run --host=0.0.0.0 --port=5000 --reload --no-debugger
     environment:
-      DEV_BROWSER_URL: http://localhost:${BACKEND_PORT:-5000}
+      DEV_BROWSER_URL: http://localhost:${BACKEND_PORT:?Set BACKEND_PORT in .env (copy .env.example)}
+      CHAT_PROVIDER: ${CHAT_PROVIDER:?Set CHAT_PROVIDER in .env (copy .env.example)}
     volumes:
       - ./backend:/app # Mount local source into the container, so edits reload Flask without rebuilding.
     ports:
-      - "127.0.0.1:${BACKEND_PORT:-5000}:5000"
+      - "127.0.0.1:${BACKEND_PORT:?Set BACKEND_PORT in .env (copy .env.example)}:5000"
     healthcheck: # Probe Flask inside the container; no host-installed tools are needed.
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/health', timeout=3)"]
       interval: 5s
@@ -24,10 +26,9 @@ services:
       - /app/node_modules
     environment:
       API_PROXY_TARGET: http://backend:5000
-      DEV_BROWSER_URL: http://localhost:${FRONTEND_PORT:-5173}
+      DEV_BROWSER_URL: http://localhost:${FRONTEND_PORT:?Set FRONTEND_PORT in .env (copy .env.example)}
     ports:
-      # FRONTEND_PORT optionally overrides the host port via the root .env.
-      - "127.0.0.1:${FRONTEND_PORT:-5173}:5173"
+      - "127.0.0.1:${FRONTEND_PORT:?Set FRONTEND_PORT in .env (copy .env.example)}:5173"
     depends_on:
       backend:
         condition: service_healthy

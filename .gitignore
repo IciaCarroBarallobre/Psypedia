@@ -14,3 +14,7 @@ __pycache__/
 .coverage
 htmlcov/
 *.egg-info/
+
+# Keep raw LLM outputs local; version only the evaluation results summary.
+backend/evaluation/reports/*
+!backend/evaluation/reports/summary.md

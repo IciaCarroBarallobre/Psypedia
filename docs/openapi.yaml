@@ -4,7 +4,7 @@ info:
   version: 0.1.0
   description: |
     API contract for the currently implemented PsyPedia backend.
-    Health and mock chat endpoints are available. No AI model is connected.
+    Health and chat endpoints are available. Local Ollama generation uses a small demo knowledge base with lexical lookup.
     The contract version does not imply a published application release.
 servers:
   - url: /api
@@ -19,7 +19,7 @@ tags:
   - name: Health
     description: Backend availability
   - name: Chat
-    description: Mock conversation endpoint
+    description: Local generation using demo topic cards
 security: []
 paths:
   /health:
@@ -45,8 +45,16 @@ paths:
     post:
       tags: [Chat]
       operationId: sendChatMessage
-      summary: Submit a question and receive a mock answer
-      description: No model is called, no clinical answer is generated, and messages are not stored. Additional request fields are ignored.
+      summary: Submit a question and receive an answer
+      description: |
+        Returns an Ollama-generated answer from demo cards, or a fixed reply in mock mode.
+        Emergency and patient-data checks run before either provider; these are limited
+        heuristics, not clinical risk assessment or anonymisation.
+        Recent history is optional, validated, and not persisted by the backend.
+        Card source links remain inside answer; no structured sources field is returned.
+        Fixed replies use Spanish; generated replies are instructed to do so.
+        See [routing and limitations](../backend/LLM_AND_PROMPTING.md#how-it-works).
+
       requestBody:
         required: true
         content:
@@ -54,22 +62,40 @@ paths:
             schema:
               $ref: '#/components/schemas/ChatRequest'
             example:
-              message: What is psychotherapy?
+              message: ¿Qué es ACT?
       responses:
         '200':
-          description: A clearly identified mock response.
+          description: A generated answer or fixed service reply, including mock and routing responses.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatResponse'
         '400':
-          description: Malformed JSON, a non-object body, or a missing, blank, or non-string message.
+          description: Malformed JSON, invalid message, or invalid conversation history.
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '415':
           description: Request Content-Type is not JSON.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '502':
+          description: Ollama returned an invalid answer or repeated a previous answer after the bounded rewrite policy.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '503':
+          description: Ollama service or configured model is unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '504':
+          description: Ollama generation timed out.
           content:
             application/json:
               schema:
@@ -96,6 +122,23 @@ components:
           minLength: 1
           pattern: '\S'
           description: Must contain at least one non-whitespace character.
+        history:
+          type: array
+          maxItems: 12
+          description: Recent turns before the current message; optional and not persisted.
+          items:
+            type: object
+            additionalProperties: false
+            required: [role, content]
+            properties:
+              role:
+                type: string
+                enum: [user, assistant]
+              content:
+                type: string
+                minLength: 1
+                maxLength: 4000
+                pattern: '\S'
     ChatResponse:
       type: object
       required: [answer]
@@ -103,7 +146,8 @@ components:
       properties:
         answer:
           type: string
-          example: 'Mock response: the assistant is not connected yet. No clinical answer has been generated.'
+          minLength: 1
+          example: 'No tengo información suficiente sobre ese aspecto para darte una respuesta fiable.'
     ErrorResponse:
       type: object
       required: [error]
@@ -116,6 +160,6 @@ components:
           properties:
             code:
               type: string
-              enum: [invalid_json, invalid_message, unsupported_media_type]
+              enum: [invalid_json, invalid_message, invalid_history, unsupported_media_type, provider_unavailable, provider_timeout, invalid_provider_response]
             message:
               type: string
