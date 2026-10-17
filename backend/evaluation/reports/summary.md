@@ -1,8 +1,10 @@
 # LLM evaluation report summary
 
+## 20206-10-17
+
 **Evaluated:** 17 October 2026, 02:34 (Europe/Madrid).
 **Model:** `qwen3:8b`, Docker CPU inference.
-**Commit:**
+**Commit:** commit bf2cf7e99309e33125cdd6ae60e1de2e668f7241
 
 Contents: [Results](#results) · [Main findings](#main-findings) · [Evidence and next steps](#evidence-and-next-steps)
 
