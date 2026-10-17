@@ -29,9 +29,28 @@ def chat():
             "invalid_message", "message must be a non-empty string.", 400
         )
 
+    history = payload.get("history", [])
+    if (
+        not isinstance(history, list) or len(history) > 12
+        or any(
+            not isinstance(turn, dict)
+            or set(turn) != {"role", "content"}
+            or turn.get("role") not in ("user", "assistant")
+            or not isinstance(turn.get("content"), str)
+            or not turn["content"].strip()
+            or len(turn["content"]) > 4000
+            for turn in history
+        )
+    ):
+        return error_response(
+            "invalid_history",
+            "history must contain at most 12 user/assistant turns with 1–4000 characters each.",
+            400,
+        )
+
     service = current_app.extensions["chat_service"]
     try:
-        answer = service.answer(message.strip())
+        answer = service.answer(message.strip(), history=history) if history else service.answer(message.strip())
     except ProviderUnavailable:
         return error_response(
             "provider_unavailable", "Ollama or the configured model is unavailable. Check the service and model installation.", 503

@@ -5,6 +5,7 @@ import os
 from flask import Flask
 
 from .api import api
+from .knowledge import DemoKnowledgeBase
 from .providers.ollama import OllamaChatProvider
 from .providers import ChatProvider
 from .providers.mock import MockChatProvider
@@ -18,11 +19,13 @@ def create_app(test_config=None, *, chat_provider: ChatProvider | None = None):
     )})
     if test_config is not None:
         app.config.update(test_config)
+    knowledge_base = None
     if chat_provider is not None:
         provider = chat_provider
     elif app.config["CHAT_PROVIDER"] == "mock":
         provider = MockChatProvider()
     elif app.config["CHAT_PROVIDER"] == "ollama":
+        knowledge_base = DemoKnowledgeBase()
         for key in ("OLLAMA_BASE_URL", "OLLAMA_MODEL", "OLLAMA_TIMEOUT"):
             if not app.config.get(key) or not str(app.config[key]).strip():
                 raise ValueError(f"Set {key} in .env (copy .env.example).")
@@ -37,6 +40,6 @@ def create_app(test_config=None, *, chat_provider: ChatProvider | None = None):
         )
     else:
         raise ValueError("Set CHAT_PROVIDER to 'ollama' or 'mock' in .env (copy .env.example).")
-    app.extensions["chat_service"] = ChatService(provider)
+    app.extensions["chat_service"] = ChatService(provider, knowledge_base)
     app.register_blueprint(api)
     return app

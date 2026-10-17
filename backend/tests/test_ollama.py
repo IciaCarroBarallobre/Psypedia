@@ -56,6 +56,20 @@ class OllamaProviderTest(unittest.TestCase):
             *history, {"role": "user", "content": "yes"},
         ])
 
+    @patch("psypedia.providers.ollama.urlopen")
+    def test_endpoint_returns_unknown_topic_fallback_without_contacting_ollama(self, open_url):
+        open_url.return_value = io.BytesIO(json.dumps({
+            "done": True, "message": {"content": "No tengo información sobre esa terapia."}
+        }).encode())
+        client = create_app({
+            "CHAT_PROVIDER": "ollama", "OLLAMA_BASE_URL": "http://ollama:11434",
+            "OLLAMA_MODEL": "test-model", "OLLAMA_TIMEOUT": 12,
+        }).test_client()
+        response = client.post("/api/chat", json={"message": "terapia de cualalumpur"})
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(set(response.json), {"answer"})
+        self.assertIn("No tengo información", response.json["answer"])
+        open_url.assert_not_called()
 
     @patch("psypedia.providers.ollama.urlopen")
     def test_qwen3_disables_thinking_without_changing_user_message(self, open_url):
