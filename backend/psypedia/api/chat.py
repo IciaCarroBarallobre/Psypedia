@@ -4,6 +4,7 @@ from flask import Blueprint, current_app, jsonify, request
 from werkzeug.exceptions import BadRequest
 
 from .errors import error_response
+from psypedia.providers import ProviderUnavailable, ProviderTimeout, ProviderInvalidResponse
 
 chat_api = Blueprint("chat", __name__)
 
@@ -29,4 +30,14 @@ def chat():
         )
 
     service = current_app.extensions["chat_service"]
-    return jsonify(answer=service.answer(message.strip()))
+    try:
+        answer = service.answer(message.strip())
+    except ProviderUnavailable:
+        return error_response(
+            "provider_unavailable", "Ollama or the configured model is unavailable. Check the service and model installation.", 503
+        )
+    except ProviderTimeout:
+        return error_response("provider_timeout", "The model took too long to answer. Please try again.", 504)
+    except ProviderInvalidResponse:
+        return error_response("invalid_provider_response", "The model returned an invalid answer. Please try again.", 502)
+    return jsonify(answer=answer)

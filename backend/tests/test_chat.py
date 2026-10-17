@@ -7,7 +7,7 @@ from psypedia.providers import ChatProvider
 
 class ChatTest(unittest.TestCase):
     def setUp(self):
-        self.client = create_app({"TESTING": True}).test_client()
+        self.client = create_app({"TESTING": True, "CHAT_PROVIDER": "mock"}).test_client()
 
     def assert_error(self, response, status, code):
         self.assertEqual(response.status_code, status)
@@ -23,7 +23,7 @@ class ChatTest(unittest.TestCase):
                 self.assertEqual(response.mimetype, "application/json")
                 self.assertEqual(set(response.json), {"answer"})
                 self.assertIsInstance(response.json["answer"], str)
-                self.assertIn("Mock response", response.json["answer"])
+                self.assertIn("Respuesta de demostración (mock)", response.json["answer"])
 
     def test_rejects_missing_empty_and_non_string_messages(self):
         for payload in ({}, {"message": ""}, {"message": " \n\t"},
@@ -51,7 +51,7 @@ class ChatProviderIntegrationTest(unittest.TestCase):
     def setUp(self):
         self.provider = Mock(spec=ChatProvider)
         self.provider.answer.return_value = "Test provider answer"
-        self.client = create_app({"TESTING": True}, chat_provider=self.provider).test_client()
+        self.client = create_app({"TESTING": True, "CHAT_PROVIDER": "mock"}, chat_provider=self.provider).test_client()
 
     def test_route_passes_trimmed_message_to_service_and_returns_answer(self):
         response = self.client.post("/api/chat", json={"message": "  Question  "})
@@ -65,8 +65,9 @@ class ChatProviderIntegrationTest(unittest.TestCase):
                 self.assertEqual(self.client.post("/api/chat", json=payload).status_code, 400)
         self.provider.answer.assert_not_called()
 
+
     def test_provider_is_scoped_to_each_application(self):
-        other_client = create_app({"TESTING": True}).test_client()
+        other_client = create_app({"TESTING": True, "CHAT_PROVIDER": "mock"}).test_client()
         response = other_client.post("/api/chat", json={"message": "Question"})
-        self.assertIn("Mock response", response.json["answer"])
+        self.assertIn("Respuesta de demostración (mock)", response.json["answer"])
         self.provider.answer.assert_not_called()

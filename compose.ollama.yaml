@@ -1,0 +1,30 @@
+# Loaded only for Docker inference; mock development and CI use compose.dev.yaml.
+services:
+  backend:
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:?Set OLLAMA_BASE_URL in .env (copy .env.example)}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:?Set OLLAMA_MODEL in .env (copy .env.example)}
+      OLLAMA_TIMEOUT: ${OLLAMA_TIMEOUT:?Set OLLAMA_TIMEOUT in .env (copy .env.example)}
+  # Docker inference; the profile is omitted when using the mock provider.
+  ollama:
+    profiles: [ollama]
+    image: ${OLLAMA_IMAGE:?Set OLLAMA_IMAGE in .env (copy .env.example)}
+    environment:
+      # Avoid retaining evaluation and application models together on local CPU/RAM.
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_MODEL: ${OLLAMA_MODEL:?Set OLLAMA_MODEL in .env (copy .env.example)}
+    volumes:
+      - ollama_models:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    # No host port: only containers on the project network can reach this API.
+
+
+volumes:
+  ollama_models:

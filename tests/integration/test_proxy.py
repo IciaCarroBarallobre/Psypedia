@@ -41,18 +41,21 @@ class ProxyIntegrationTest(unittest.TestCase):
             with self.subTest(url=url):
                 request = Request(
                     f"{url}/api/chat",
-                    data=json.dumps({"message": "A test question"}).encode(),
+                    data=json.dumps({"message": "What is ACT?"}).encode(),
                     headers={"Content-Type": "application/json"},
                     method="POST",
                 )
-                with urlopen(request, timeout=5) as response:
+                with urlopen(request, timeout=130) as response:
                     self.assertEqual(response.status, 200)
                     self.assertEqual(response.headers.get_content_type(), "application/json")
                     answer = json.load(response)["answer"]
                     self.assertIsInstance(answer, str)
-                    self.assertIn("Mock response", answer)
+                    self.assertTrue(answer.strip())
+                    if os.environ.get("CHAT_PROVIDER") == "mock":
+                        self.assertIn("Respuesta de demostración (mock)", answer)
                     answers.append(answer)
-        self.assertEqual(answers[0], answers[1])
+        if os.environ.get("CHAT_PROVIDER") == "mock":
+            self.assertEqual(answers[0], answers[1])
 
     def test_chat_validation_error_passes_through_vite(self):
         request = Request(
